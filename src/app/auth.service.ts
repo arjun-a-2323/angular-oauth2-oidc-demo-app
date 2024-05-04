@@ -1,34 +1,63 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { OAuthService } from 'angular-oauth2-oidc';
 import { jwtDecode } from 'jwt-decode';
+import { authConfig } from './oauth2-oidc-config';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
+  
 })
 export class AuthService {
-  decodeToken(token: string): any {
-    return JSON.stringify(jwtDecode(token));
+
+  
+
+  constructor(private oauthService: OAuthService) {
+    oauthService.configure(authConfig);
+    this.oauthService.loadDiscoveryDocumentAndTryLogin();
+   }
+
+    decodeToken(token: string): any {
+      return JSON.stringify(jwtDecode(token));
+      
+    }
+
+    
+
+  login(data: any) {
+    
+    this.oauthService.initCodeFlow();
+    
+    sessionStorage.setItem('id_token', this.oauthService.getIdToken());
+    sessionStorage.setItem('access_token', this.oauthService.getAccessToken());
+    return data;
   }
 
-  constructor() { }
-
-login(data: any) {
-  sessionStorage.setItem('id_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
-  sessionStorage.setItem('access_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
-  return data;
-}
-
 loginWithIDP() {
-  sessionStorage.setItem('id_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
-  sessionStorage.setItem('access_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
-}
+  
+  this.oauthService.initCodeFlow();
+  sessionStorage.setItem('id_token', this.oauthService.getIdToken());
+    sessionStorage.setItem('access_token', this.oauthService.getAccessToken());
+  }
 
 logout() {
+  this.oauthService.logOut();
   sessionStorage.removeItem('id_token');
   sessionStorage.removeItem('access_token');
 }
 
 isLoggedIn() {
-  return sessionStorage.getItem('id_token') !== null;
+  // const id_token = this.oauthService.getIdToken();
+  // const access_token = this.oauthService.getAccessToken();
+  //if(id_token !== null && id_token !== undefined && id_token !== '' && id_token !== 'null' && id_token !== 'undefined'){
+    //sessionStorage.setItem('id_token', id_token);
+  //}
+  //if(access_token !== null && access_token !== undefined && access_token !== '' && access_token !== 'null' && access_token !== 'undefined'){
+    //sessionStorage.setItem('access_token',access_token);
+  //}
+ 
+
+ 
+ return sessionStorage.getItem('id_token')!== null;
 }
 
 }
