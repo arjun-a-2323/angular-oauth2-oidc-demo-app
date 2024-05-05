@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { jwtDecode } from 'jwt-decode';
 import { authConfig } from './oauth2-oidc-config';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -10,16 +10,28 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class AuthService {
 
-  private isAuthenticated = new BehaviorSubject<boolean>(false);
+  private isAuthenticatedSubject$ = new BehaviorSubject<boolean>(false);
+  public isAuthenticated$ = this.isAuthenticatedSubject$.asObservable();
+
+  private isDoneLoadingSubject$ = new BehaviorSubject<boolean>(false);
+  public isDoneLoading$ = this.isDoneLoadingSubject$.asObservable();
+
+  public canActivateProtectedRoutes$: Observable<boolean> = combineLatest([
+    this.isAuthenticated$,
+    this.isDoneLoading$
+  ]).pipe(map(values => values.every(b => b)));
 
   constructor(private oauthService: OAuthService) {
     oauthService.configure(authConfig);
-    this.oauthService.loadDiscoveryDocumentAndTryLogin();
+    this.oauthService.loadDiscoveryDocumentAndTryLogin().then(_ => {
+      this.isDoneLoadingSubject$.next(true);
+      this.isAuthenticatedSubject$.next(this.oauthService.hasValidIdToken());
+    } );
     this.oauthService.events.subscribe(e => {
       console.log('oauth/oidc event', e.type);
       if(e.type === 'token_received'){
         console.log('received token');
-        this.isAuthenticated.next(true);
+        this.isAuthenticatedSubject$.next(this.oauthService.hasValidIdToken());
       }
     });
    }
@@ -50,7 +62,8 @@ loginWithIDP() {
 logout() {
   this.oauthService.logOut();
   sessionStorage.clear();
-  this.isAuthenticated.next(false);
+  this.isAuthenticatedSubject$.next(false);
+  this.isDoneLoadingSubject$.next(false);
 }
 
 isLoggedIn() {
