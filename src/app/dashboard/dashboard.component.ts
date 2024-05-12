@@ -3,6 +3,7 @@ import { AuthService } from '../auth.service';
 import { Router, RouterOutlet } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { AsyncPipe, CommonModule, JsonPipe } from '@angular/common';
+import { ApiService } from '../api.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,12 +15,14 @@ import { AsyncPipe, CommonModule, JsonPipe } from '@angular/common';
 export class DashboardComponent implements OnInit {
   authService = inject(AuthService);
   router = inject(Router);
+  apiService = inject(ApiService);
 
   id_token!: Observable<string>;
   decoded_id_token!: Observable<string>;
   access_token!: Observable<string>;
   decoded_access_token!: Observable<string>;
   userProfile!: Observable<any>;
+  apiData!: Observable<any>;
 
   ngOnInit(): void {
     this.id_token = of(sessionStorage.getItem('id_token') ?? '');
@@ -35,6 +38,8 @@ export class DashboardComponent implements OnInit {
       console.log(profile);
       this.userProfile = of(profile);
     });
+
+    this.apiData = this.apiService.invokeApi();
   }
 
   public logout() {
