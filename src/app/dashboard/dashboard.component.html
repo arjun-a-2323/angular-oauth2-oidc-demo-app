@@ -1,13 +1,11 @@
-@if (authService.canActivateProtectedRoutes$ | async; as canActivateProtectedRoutes) {
-    @if (canActivateProtectedRoutes) {
-<p>dashboard works!</p>
-<a href="#" (click)="logout()">Logout</a>
+<h1>dashboard</h1>
+<a href="javascript:void(0)" (click)="logout()">Logout</a>
 <div class="id_token">
     <h3>id_token</h3>
     <p>{{id_token | async }}</p>
     <h3>decoded id_token</h3>
-    
-        <pre>{{decoded_id_token | async | json }}</pre>
+
+    <pre>{{decoded_id_token | async | json }}</pre>
 </div>
 
 <div class="access_token">
@@ -21,6 +19,3 @@
     <h3>User Profile</h3>
     <pre>{{userProfile | async | json}}</pre>
 </div>
-} 
-
-}

@@ -6,6 +6,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideOAuthClient } from 'angular-oauth2-oidc';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes),provideHttpClient(),
-    provideOAuthClient()]
+  providers: [provideRouter(routes), provideHttpClient(),
+  provideOAuthClient()]
 };
